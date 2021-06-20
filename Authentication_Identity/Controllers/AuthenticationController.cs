@@ -1,4 +1,5 @@
 ﻿using Authentication.Shared.ViewModel;
+using Authentication_Identity.API.Model;
 using Authentication_Identity.API.Service;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -15,10 +16,12 @@ namespace Authentication_Identity.API.Controllers
     public class AuthenticationController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IEmailService _emailService;
 
-        public AuthenticationController(IUserService userService)
+        public AuthenticationController(IUserService userService, IEmailService emailService)
         {
             _userService = userService;
+            _emailService = emailService;
         }
 
         // /api/authentication/register
@@ -30,6 +33,14 @@ namespace Authentication_Identity.API.Controllers
                 var result = await _userService.RegisterUserAsync(model);
                 if (result.IsSuccess)
                 {
+
+                    UserEmailOptions options = new UserEmailOptions
+                    {
+                        ToMails = new List<string>() { "test@gmail.com"}
+                    };
+
+                    await _emailService.SendTestemail(options);
+                    
                     return Ok(result);
                 }
                 return BadRequest(result);
