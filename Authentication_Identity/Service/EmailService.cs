@@ -24,8 +24,8 @@ namespace Authentication_Identity.API.Service
 
         public async Task SendTestemail(UserEmailOptions userEmailOptions)
         {
-            userEmailOptions.Subject = "Test Mail";
-            userEmailOptions.Body = GetEmailBody("EmailBody");
+            userEmailOptions.Subject = UpdaetPlaceHolders("Test Mail for {{UserName}}",userEmailOptions.PlaceHolders);
+            userEmailOptions.Body = UpdaetPlaceHolders(GetEmailBody("RegistraionConfirmation"),userEmailOptions.PlaceHolders);
 
             await SendMail(userEmailOptions);
         }
@@ -65,6 +65,22 @@ namespace Authentication_Identity.API.Service
         {
             var body = File.ReadAllText(string.Format(templatePath, templateName));
             return body;
+        }
+
+        private string UpdaetPlaceHolders(string text, List<KeyValuePair<string,string>> keyValuePairs)
+        {
+            if (!string.IsNullOrEmpty(text) && keyValuePairs != null)
+            {
+                foreach (var placeholer in keyValuePairs)
+                {
+                    if (text.Contains(placeholer.Key))
+                    {
+                        text = text.Replace(placeholer.Key, placeholer.Value);
+                    }
+                }
+            }
+
+            return text;
         }
     }
 }

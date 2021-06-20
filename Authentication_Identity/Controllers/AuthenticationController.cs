@@ -36,7 +36,11 @@ namespace Authentication_Identity.API.Controllers
 
                     UserEmailOptions options = new UserEmailOptions
                     {
-                        ToMails = new List<string>() { "test@gmail.com"}
+                        ToMails = new List<string>() { model.Email },
+                        PlaceHolders = new List<KeyValuePair<string, string>>()
+                        {
+                            new KeyValuePair<string, string>("{{UserName}}",model.Name)
+                        } 
                     };
 
                     await _emailService.SendTestemail(options);
