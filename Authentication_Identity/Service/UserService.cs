@@ -1,5 +1,6 @@
 ﻿using Authentication.Shared.ViewModel;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -46,12 +47,18 @@ namespace Authentication_Identity.API.Service
 
             var result = await _userManager.CreateAsync(identityUser, model.Password);
 
+
             if (result.Succeeded)
             {
+                var confirmEmailToken = await _userManager.GenerateEmailConfirmationTokenAsync(identityUser);
+                var encodedEmailToken = Encoding.UTF8.GetBytes(confirmEmailToken);
+                var validEmailTken = WebEncoders.Base64UrlEncode(encodedEmailToken);
+
                 return new UserManagerResponse
                 {
                     Message = "User Created Successfully",
                     IsSuccess = true,
+                    EmailVerificatinToken = validEmailTken
                 };
             }
             else
