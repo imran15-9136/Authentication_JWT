@@ -37,9 +37,8 @@ namespace Authentication_Identity.API.Controllers
                 var result = await _userService.RegisterUserAsync(model);
                 if (result.IsSuccess)
                 {
-                    string appDomain = _configuration.GetSection("Applicaiton:AppDmain").Value;
-                    string confirmationLink = _configuration.GetSection("Applicaiton:EmailConfirmation").Value;
-
+                    string appDomain = _configuration.GetSection("Applicaiton:AppDomain").Value;
+                    string confirmationLink = _configuration.GetSection("Applicaiton:EmailConfirmation").Value; 
 
                     UserEmailOptions options = new UserEmailOptions
                     {
@@ -47,11 +46,11 @@ namespace Authentication_Identity.API.Controllers
                         PlaceHolders = new List<KeyValuePair<string, string>>()
                         {
                             new KeyValuePair<string, string>("{{UserName}}",model.Name),
-                            new KeyValuePair<string, string>("{{Link}}",string.Format(appDomain + confirmationLink, result.EmailVerificatinToken))
+                            new KeyValuePair<string, string>("{{Link}}",string.Format(appDomain + confirmationLink, result.UserId, result.EmailVerificatinToken))
                         } 
                     };
 
-                    await _emailService.SendTestemail(options);
+                    await _emailService.SendAccountConfirmationMail(options);
                     
                     return Ok(result);
                 }

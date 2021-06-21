@@ -58,7 +58,8 @@ namespace Authentication_Identity.API.Service
                 {
                     Message = "User Created Successfully",
                     IsSuccess = true,
-                    EmailVerificatinToken = validEmailTken
+                    EmailVerificatinToken = validEmailTken,
+                    UserId = identityUser.Id
                 };
             }
             else

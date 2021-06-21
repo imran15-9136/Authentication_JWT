@@ -22,10 +22,11 @@ namespace Authentication_Identity.API.Service
             _smtpConfig = smtpConfig.Value;
         }
 
-        public async Task SendTestemail(UserEmailOptions userEmailOptions)
+        public async Task SendAccountConfirmationMail(UserEmailOptions userEmailOptions)
         {
-            userEmailOptions.Subject = UpdaetPlaceHolders("Test Mail for {{UserName}}",userEmailOptions.PlaceHolders);
+            userEmailOptions.Subject = UpdaetPlaceHolders("Registration confirmaion {{UserName}}",userEmailOptions.PlaceHolders);
             userEmailOptions.Body = UpdaetPlaceHolders(GetEmailBody("RegistraionConfirmation"),userEmailOptions.PlaceHolders);
+            //userEmailOptions.ActivateionLink = UpdaetPlaceHolders("Link", userEmailOptions.PlaceHolders);          
 
             await SendMail(userEmailOptions);
         }
@@ -79,7 +80,6 @@ namespace Authentication_Identity.API.Service
                     }
                 }
             }
-
             return text;
         }
     }
