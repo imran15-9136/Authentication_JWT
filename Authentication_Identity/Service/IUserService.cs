@@ -1,4 +1,5 @@
 ﻿using Authentication.Shared.ViewModel;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,5 +11,6 @@ namespace Authentication_Identity.API.Service
     {
         Task<UserManagerResponse> RegisterUserAsync(RegisterViewModel model);
         Task<UserManagerResponse> LoginUserAsync(LoginViewModel model);
+        Task<IdentityResult> ConfirmEmailAsync(string uid, string token);
     }
 }

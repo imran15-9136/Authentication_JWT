@@ -46,7 +46,7 @@ namespace Authentication_Identity.API.Controllers
                         PlaceHolders = new List<KeyValuePair<string, string>>()
                         {
                             new KeyValuePair<string, string>("{{UserName}}",model.Name),
-                            new KeyValuePair<string, string>("{{Link}}",string.Format(appDomain + confirmationLink, result.UserId, result.EmailVerificatinToken))
+                            new KeyValuePair<string, string>("{{Link}}",string.Format(appDomain + "api/authentication/" + confirmationLink, result.UserId, result.EmailVerificatinToken))
                         } 
                     };
 
@@ -79,5 +79,32 @@ namespace Authentication_Identity.API.Controllers
                 return BadRequest("Invalid User Details");
             }
         }
+
+        // /api/Authentication/confirm-email?uid=oi34u3o&token=938457498
+        [HttpGet("confirm-email")]
+        public async Task<IActionResult> ConfirmAccountAsync(string uid, string token)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(uid) && !string.IsNullOrEmpty(token))
+                {
+                    //token = token.Replace(' ', '+');
+
+                    var result = await _userService.ConfirmEmailAsync(uid, token);
+
+                    if (result.Succeeded)
+                    {
+                        return Ok(result);
+                    }
+                    return BadRequest("Unable to Activate");
+                }
+                return NotFound("User Not Found");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
     }
 }

@@ -122,5 +122,19 @@ namespace Authentication_Identity.API.Service
                 ExpireDate = token.ValidTo
             };
         }
+
+        public async Task<IdentityResult> ConfirmEmailAsync(string uid, string token)
+        {
+             var user = await _userManager.FindByIdAsync(uid);
+
+             var result = await _userManager.ConfirmEmailAsync(user, token);
+
+             if (result.Succeeded)
+             {
+                 return result;
+             }
+
+            return null;
+        }
     }
 }
