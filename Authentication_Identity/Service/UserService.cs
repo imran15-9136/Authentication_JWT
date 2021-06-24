@@ -125,14 +125,15 @@ namespace Authentication_Identity.API.Service
 
         public async Task<IdentityResult> ConfirmEmailAsync(string uid, string token)
         {
-             var user = await _userManager.FindByIdAsync(uid);
 
-             var result = await _userManager.ConfirmEmailAsync(user, token);
+            var user = await _userManager.FindByIdAsync(uid);
 
-             if (result.Succeeded)
-             {
-                 return result;
-             }
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+
+            if (result.Succeeded)
+            {
+                return result;
+            }
 
             return null;
         }

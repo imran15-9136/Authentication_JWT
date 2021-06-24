@@ -88,7 +88,7 @@ namespace Authentication_Identity.API.Controllers
             {
                 if (!string.IsNullOrEmpty(uid) && !string.IsNullOrEmpty(token))
                 {
-                    //token = token.Replace(' ', '+');
+                    token = token.Replace(' ', '+');
 
                     var result = await _userService.ConfirmEmailAsync(uid, token);
 
