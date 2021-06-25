@@ -106,5 +106,31 @@ namespace Authentication_Identity.API.Controllers
             }
         }
 
+        // /api/Authentication/confirm-email?uid=oi34u3o&token=938457498
+        [HttpPost("confirm-email")]
+        public async Task<IActionResult> ResendEmailConfirmationLinkAsync(string uid, string token)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(uid) && !string.IsNullOrEmpty(token))
+                {
+                    token = token.Replace(' ', '+');
+
+                    var result = await _userService.ConfirmEmailAsync(uid, token);
+
+                    if (result.Succeeded)
+                    {
+                        return Ok(result);
+                    }
+                    return BadRequest("Unable to Activate");
+                }
+                return NotFound("User Not Found");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Authentication.Shared.ViewModel;
+using Authentication_Identity.API.Model;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
@@ -21,6 +22,16 @@ namespace Authentication_Identity.API.Service
         {
             _userManager = userManager;
             _configuration = configuration;
+        }
+
+        public async Task<IdentityUser> GetUserByEmailAsync(string email)
+        {
+            return await _userManager.FindByEmailAsync(email);
+        }
+
+        public async Task<IdentityUser> GetUserByIdAsync(string uid)
+        {
+            return await _userManager.FindByIdAsync(uid);
         }
 
         public async Task<UserManagerResponse> RegisterUserAsync(RegisterViewModel model)
@@ -50,15 +61,13 @@ namespace Authentication_Identity.API.Service
 
             if (result.Succeeded)
             {
-                var confirmEmailToken = await _userManager.GenerateEmailConfirmationTokenAsync(identityUser);
-                var encodedEmailToken = Encoding.UTF8.GetBytes(confirmEmailToken);
-                var validEmailTken = WebEncoders.Base64UrlEncode(encodedEmailToken);
 
+                var validEmailToken = await GenerateTokenAsync(identityUser);
                 return new UserManagerResponse
                 {
                     Message = "User Created Successfully",
                     IsSuccess = true,
-                    EmailVerificatinToken = validEmailTken,
+                    EmailVerificatinToken = validEmailToken,
                     UserId = identityUser.Id
                 };
             }
@@ -71,6 +80,15 @@ namespace Authentication_Identity.API.Service
                     Errors = result.Errors.Select(c => c.Description),
                 };
             }
+        }
+
+        public async Task<string> GenerateTokenAsync(IdentityUser user)
+        {
+            var confirmEmailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var encodedEmailToken = Encoding.UTF8.GetBytes(confirmEmailToken);
+            var validEmailTken = WebEncoders.Base64UrlEncode(encodedEmailToken);
+
+            return validEmailTken;
         }
 
         public async Task<UserManagerResponse> LoginUserAsync(LoginViewModel model)
@@ -125,8 +143,7 @@ namespace Authentication_Identity.API.Service
 
         public async Task<IdentityResult> ConfirmEmailAsync(string uid, string token)
         {
-
-            var user = await _userManager.FindByIdAsync(uid);
+            var user = await GetUserByIdAsync(uid);
 
             var result = await _userManager.ConfirmEmailAsync(user, token);
 

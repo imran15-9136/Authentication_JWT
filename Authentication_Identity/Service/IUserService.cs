@@ -12,5 +12,8 @@ namespace Authentication_Identity.API.Service
         Task<UserManagerResponse> RegisterUserAsync(RegisterViewModel model);
         Task<UserManagerResponse> LoginUserAsync(LoginViewModel model);
         Task<IdentityResult> ConfirmEmailAsync(string uid, string token);
+        Task<string> GenerateTokenAsync(IdentityUser user);
+        Task<IdentityUser> GetUserByEmailAsync(string email);
+        Task<IdentityUser> GetUserByIdAsync(string uid);
     }
 }
