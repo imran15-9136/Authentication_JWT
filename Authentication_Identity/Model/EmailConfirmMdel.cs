@@ -8,5 +8,7 @@ namespace Authentication_Identity.API.Model
     public class EmailConfirmMdel
     {
         public string Email { get; set; }
+        public bool EmailSent { get; set; }
+        public bool IsConfirmed { get; set; }
     }
 }

@@ -13,7 +13,6 @@ namespace Authentication_Identity.API.Service
 {
     public class EmailService : IEmailService
     {
-
         private const string templatePath = @"EmailTemplate/{0}.html";
         private readonly SMTPConfigModel _smtpConfig;
 
@@ -25,8 +24,7 @@ namespace Authentication_Identity.API.Service
         public async Task SendAccountConfirmationMail(UserEmailOptions userEmailOptions)
         {
             userEmailOptions.Subject = UpdaetPlaceHolders("Registration confirmaion {{UserName}}",userEmailOptions.PlaceHolders);
-            userEmailOptions.Body = UpdaetPlaceHolders(GetEmailBody("RegistraionConfirmation"),userEmailOptions.PlaceHolders);
-            //userEmailOptions.ActivateionLink = UpdaetPlaceHolders("Link", userEmailOptions.PlaceHolders);          
+            userEmailOptions.Body = UpdaetPlaceHolders(GetEmailBody("RegistraionConfirmation"),userEmailOptions.PlaceHolders);         
 
             await SendMail(userEmailOptions);
         }
@@ -64,8 +62,7 @@ namespace Authentication_Identity.API.Service
 
         private string GetEmailBody(string templateName)
         {
-            var body = File.ReadAllText(string.Format(templatePath, templateName));
-            return body;
+            return File.ReadAllText(string.Format(templatePath, templateName));
         }
 
         private string UpdaetPlaceHolders(string text, List<KeyValuePair<string,string>> keyValuePairs)

@@ -108,23 +108,27 @@ namespace Authentication_Identity.API.Controllers
 
         // /api/Authentication/confirm-email?uid=oi34u3o&token=938457498
         [HttpPost("confirm-email")]
-        public async Task<IActionResult> ResendEmailConfirmationLinkAsync(string uid, string token)
+        public async Task<IActionResult> ResendEmailConfirmationLinkAsync([FromBody]EmailConfirmMdel model)
         {
             try
             {
-                if (!string.IsNullOrEmpty(uid) && !string.IsNullOrEmpty(token))
+                var user = await _userService.GetUserByEmailAsync(model.Email);
+
+                if (user != null)
                 {
-                    token = token.Replace(' ', '+');
-
-                    var result = await _userService.ConfirmEmailAsync(uid, token);
-
-                    if (result.Succeeded)
+                    if (user.EmailConfirmed)
                     {
-                        return Ok(result);
+                        model.IsConfirmed = true;
+                        return Ok("Email Confirmed");
                     }
-                    return BadRequest("Unable to Activate");
+                    await _userService.GenerateTokenAsync(user);
+                    model.EmailSent = true;
                 }
-                return NotFound("User Not Found");
+                else
+                {
+                    ModelState.AddModelError("","Some Thing Went Wrong");
+                }
+                return BadRequest("Unable To Resend");
             }
             catch (Exception ex)
             {
