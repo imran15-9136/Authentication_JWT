@@ -58,10 +58,8 @@ namespace Authentication_Identity.API.Service
 
             var result = await _userManager.CreateAsync(identityUser, model.Password);
 
-
             if (result.Succeeded)
             {
-
                 var validEmailToken = await GenerateTokenAsync(identityUser);
                 return new UserManagerResponse
                 {
@@ -132,7 +130,7 @@ namespace Authentication_Identity.API.Service
                 );
 
             string tokenAsString = new JwtSecurityTokenHandler().WriteToken(token);
-                
+            
             return new UserManagerResponse
             {
                 Message = tokenAsString, 
