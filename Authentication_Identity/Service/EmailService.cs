@@ -1,4 +1,6 @@
-﻿using Authentication_Identity.API.Model;
+﻿using Authentication.Shared.ViewModel;
+using Authentication_Identity.API.Model;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -15,10 +17,12 @@ namespace Authentication_Identity.API.Service
     {
         private const string templatePath = @"EmailTemplate/{0}.html";
         private readonly SMTPConfigModel _smtpConfig;
+        private readonly IConfiguration _configuration;
 
-        public EmailService(IOptions<SMTPConfigModel> smtpConfig)
+        public EmailService(IOptions<SMTPConfigModel> smtpConfig, IConfiguration configuration)
         {
             _smtpConfig = smtpConfig.Value;
+            _configuration = configuration;
         }
 
         public async Task SendAccountConfirmationMail(UserEmailOptions userEmailOptions)
@@ -26,10 +30,10 @@ namespace Authentication_Identity.API.Service
             userEmailOptions.Subject = UpdaetPlaceHolders("Registration confirmaion {{UserName}}",userEmailOptions.PlaceHolders);
             userEmailOptions.Body = UpdaetPlaceHolders(GetEmailBody("RegistraionConfirmation"),userEmailOptions.PlaceHolders);         
 
-            await SendMail(userEmailOptions);
+            await SendMailAsync(userEmailOptions);
         }
 
-        private async Task SendMail(UserEmailOptions userEmailOptions)
+        private async Task SendMailAsync(UserEmailOptions userEmailOptions)
         {
             MailMessage mail = new MailMessage
             {
