@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31313.79
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Authentication_Identity.API", "Authentication_Identity\Authentication_Identity.API.csproj", "{60348651-9629-4234-A2D9-7240509189CA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Authentication.API", "Authentication_Identity\Authentication.API.csproj", "{60348651-9629-4234-A2D9-7240509189CA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Authentication.Shared", "Authentication.Shared\Authentication.Shared.csproj", "{9F5095BE-E888-4371-8445-011DD9A93F5E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Authentication.Shared", "Authentication.Shared\Authentication.Shared.csproj", "{9F5095BE-E888-4371-8445-011DD9A93F5E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
