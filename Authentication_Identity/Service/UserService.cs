@@ -1,5 +1,6 @@
 ﻿using Authentication.Shared.ViewModel;
 using Authentication_Identity.API.Model;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
@@ -18,21 +19,19 @@ namespace Authentication_Identity.API.Service
     {
         private UserManager<IdentityUser> _userManager;
         private IConfiguration _configuration;
-        public UserService(UserManager<IdentityUser> userManager, IConfiguration configuration)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public UserService(UserManager<IdentityUser> userManager, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
             _userManager = userManager;
             _configuration = configuration;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<IdentityUser> GetUserByEmailAsync(string email)
-        {
-            return await _userManager.FindByEmailAsync(email);
-        }
+        public async Task<IdentityUser> GetUserByEmailAsync(string email) => await _userManager.FindByEmailAsync(email);
 
-        public async Task<IdentityUser> GetUserByIdAsync(string uid)
-        {
-            return await _userManager.FindByIdAsync(uid);
-        }
+        public async Task<IdentityUser> GetUserByIdAsync(string uid) => await _userManager.FindByIdAsync(uid);
+
+        public string GetCurrentUserIdAsync() => _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
         public async Task<UserManagerResponse> RegisterUserAsync(RegisterViewModel model)
         {
@@ -137,6 +136,25 @@ namespace Authentication_Identity.API.Service
                 IsSuccess = true,
                 ExpireDate = token.ValidTo
             };
+        }
+
+        public async Task<IdentityUser> ChangePasswordAsync(UserChangePasswordDto model)
+        {
+            var userId = GetCurrentUserIdAsync();
+            if (userId == null)
+            {
+                throw new Exception("User is not found while try to change password with user Id: " + userId);
+            }
+            var user = await GetUserByIdAsync(userId);
+
+            var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+
+            if (!result.Succeeded)
+            {
+                throw new Exception("Unable to change password with user Id: " + userId);
+            }
+
+            return user;
         }
 
         public async Task<IdentityResult> ConfirmEmailAsync(string uid, string token)

@@ -106,6 +106,23 @@ namespace Authentication_Identity.API.Controllers
             }
         }
 
+        [HttpPut("ChangePassword")]
+        public async Task<IActionResult> ChangePassword([FromBody] UserChangePasswordDto model)
+        {
+            try
+            {
+                if (ModelState.IsValid && model.NewPassword == model.ReTypePassword)
+                {
+                    return Ok(await _userService.ChangePasswordAsync(model));
+                }
+                return BadRequest("Request Invalid");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         // /api/Authentication/confirm-email?uid=oi34u3o&token=938457498
         [HttpPost("confirm-email")]
         public async Task<IActionResult> ResendEmailConfirmationLinkAsync([FromBody]EmailConfirmMdel model)
