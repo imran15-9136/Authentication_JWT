@@ -20,11 +20,13 @@ namespace Authentication_Identity.API.Service
         private UserManager<IdentityUser> _userManager;
         private IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public UserService(UserManager<IdentityUser> userManager, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+        private readonly SignInManager<IdentityUser> _signInManager;
+        public UserService(UserManager<IdentityUser> userManager, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, SignInManager<IdentityUser> signInManager)
         {
             _userManager = userManager;
             _configuration = configuration;
             _httpContextAccessor = httpContextAccessor;
+            _signInManager = signInManager;
         }
 
         public async Task<IdentityUser> GetUserByEmailAsync(string email) => await _userManager.FindByEmailAsync(email);
@@ -157,6 +159,25 @@ namespace Authentication_Identity.API.Service
             return user;
         }
 
+        public async Task<IdentityUser> AdminresetPasswordAsync(AdminResetPasswordDto model)
+        {
+            var user = await GetUserByIdAsync(model.UserId);
+
+            if (user!= null)
+            {
+                user.PasswordHash = _userManager.PasswordHasher.HashPassword(user,model.NewPassword);
+
+                var result = await _userManager.UpdateAsync(user);
+
+                if (result.Succeeded)
+                {
+                    return user;
+                }
+            }
+
+            return null;
+        }
+
         public async Task<IdentityResult> ConfirmEmailAsync(string uid, string token)
         {
             var user = await GetUserByIdAsync(uid);
@@ -170,5 +191,8 @@ namespace Authentication_Identity.API.Service
 
             return null;
         }
+
+        public void LogoutAsync() => _signInManager.SignOutAsync();
+
     }
 }

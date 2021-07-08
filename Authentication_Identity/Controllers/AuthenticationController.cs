@@ -123,6 +123,23 @@ namespace Authentication_Identity.API.Controllers
             }
         }
 
+        [HttpPut("AdminPasswordReset")]
+        public async Task<IActionResult> AdminResetPassword([FromBody] AdminResetPasswordDto model)
+        {
+            try
+            {
+                if (ModelState.IsValid && model.NewPassword == model.ConfirmPassword)
+                {
+                    return Ok(await _userService.AdminresetPasswordAsync(model));
+                }
+                return BadRequest("Invalid Operation");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         // /api/Authentication/confirm-email?uid=oi34u3o&token=938457498
         [HttpPost("confirm-email")]
         public async Task<IActionResult> ResendEmailConfirmationLinkAsync([FromBody]EmailConfirmMdel model)
@@ -153,5 +170,7 @@ namespace Authentication_Identity.API.Controllers
             }
         }
 
+        [HttpPost("Logout")]
+        public void Logout() => _userService.LogoutAsync();
     }
 }
