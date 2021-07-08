@@ -41,44 +41,49 @@ namespace Authentication_Identity.API.Service
             {
                 throw new NullReferenceException("Register Model is null");
             }
-
-            if (model.Password != model.ConfirmPassword)
+            var user = GetUserByEmailAsync(model.Email);
+            if (user == null)
             {
-                return new UserManagerResponse
+
+                if (model.Password != model.ConfirmPassword)
                 {
-                    Message = "Confirm password dosen't match",
-                    IsSuccess = false,
-                };
-            }
+                    return new UserManagerResponse
+                    {
+                        Message = "Confirm password dosen't match",
+                        IsSuccess = false,
+                    };
+                }
 
-            var identityUser = new IdentityUser
-            {
-                Email = model.Email,
-                UserName = model.Email,
-            };
-
-            var result = await _userManager.CreateAsync(identityUser, model.Password);
-
-            if (result.Succeeded)
-            {
-                var validEmailToken = await GenerateTokenAsync(identityUser);
-                return new UserManagerResponse
+                var identityUser = new IdentityUser
                 {
-                    Message = "User Created Successfully",
-                    IsSuccess = true,
-                    EmailVerificatinToken = validEmailToken,
-                    UserId = identityUser.Id
+                    Email = model.Email,
+                    UserName = model.Email,
                 };
-            }
-            else
-            {
-                return new UserManagerResponse
+
+                var result = await _userManager.CreateAsync(identityUser, model.Password);
+
+                if (result.Succeeded)
                 {
-                    Message = "User didn't create",
-                    IsSuccess = false,
-                    Errors = result.Errors.Select(c => c.Description),
-                };
+                    var validEmailToken = await GenerateTokenAsync(identityUser);
+                    return new UserManagerResponse
+                    {
+                        Message = "User Created Successfully",
+                        IsSuccess = true,
+                        EmailVerificatinToken = validEmailToken,
+                        UserId = identityUser.Id
+                    };
+                }
+                else
+                {
+                    return new UserManagerResponse
+                    {
+                        Message = "User didn't create",
+                        IsSuccess = false,
+                        Errors = result.Errors.Select(c => c.Description),
+                    };
+                }
             }
+            return null;
         }
 
         public async Task<string> GenerateTokenAsync(IdentityUser user)
