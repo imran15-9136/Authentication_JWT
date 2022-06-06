@@ -14,12 +14,14 @@ namespace Authentication_Identity.API.Service
 {
     public class UserService : IUserService
     {
-        private UserManager<IdentityUser> _userManager;
-        private IConfiguration _configuration;
-        public UserService(UserManager<IdentityUser> userManager, IConfiguration configuration)
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly IConfiguration _configuration;
+        private readonly SignInManager<IdentityUser> _signInManager;
+        public UserService(UserManager<IdentityUser> userManager, IConfiguration configuration, SignInManager<IdentityUser> signInManager)
         {
             _userManager = userManager;
             _configuration = configuration;
+            _signInManager = signInManager;
         }
 
         public async Task<UserManagerResponse> RegisterUserAsync(RegisterViewModel model)
@@ -114,5 +116,7 @@ namespace Authentication_Identity.API.Service
                 ExpireDate = token.ValidTo
             };
         }
+
+        public void LogoutAsync() => _signInManager.SignOutAsync();
     }
 }

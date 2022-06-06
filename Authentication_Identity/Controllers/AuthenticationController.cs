@@ -57,5 +57,8 @@ namespace Authentication_Identity.API.Controllers
                 return BadRequest("Invalid User Details");
             }
         }
+
+        [HttpPost("Logout")]
+        public void Logout() => _userService.LogoutAsync();
     }
 }

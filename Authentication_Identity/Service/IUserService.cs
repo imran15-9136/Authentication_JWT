@@ -10,5 +10,7 @@ namespace Authentication_Identity.API.Service
     {
         Task<UserManagerResponse> RegisterUserAsync(RegisterViewModel model);
         Task<UserManagerResponse> LoginUserAsync(LoginViewModel model);
+        void LogoutAsync();
     }
 }
+
