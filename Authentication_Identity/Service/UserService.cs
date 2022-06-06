@@ -1,5 +1,7 @@
 ﻿using Authentication.Shared.ViewModel;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -17,12 +19,23 @@ namespace Authentication_Identity.API.Service
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IConfiguration _configuration;
         private readonly SignInManager<IdentityUser> _signInManager;
-        public UserService(UserManager<IdentityUser> userManager, IConfiguration configuration, SignInManager<IdentityUser> signInManager)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public UserService(UserManager<IdentityUser> userManager, IConfiguration configuration, SignInManager<IdentityUser> signInManager, IHttpContextAccessor httpContextAccessor)
         {
             _userManager = userManager;
             _configuration = configuration;
             _signInManager = signInManager;
+            _httpContextAccessor = httpContextAccessor;
         }
+
+        public async Task<IdentityUser> GetUserByEmailAsync(string email) => await _userManager.FindByEmailAsync(email);
+
+        public IdentityUser GetUssers() => (IdentityUser)_userManager.Users;
+
+        public string GetCurrentUserIdAsync() => _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+        
+        public async Task<IdentityUser> GetUserByIdAsync(string uid) => await _userManager.FindByIdAsync(uid);
+
 
         public async Task<UserManagerResponse> RegisterUserAsync(RegisterViewModel model)
         {
@@ -31,40 +44,60 @@ namespace Authentication_Identity.API.Service
                 throw new NullReferenceException("Register Model is null");
             }
 
-            if (model.Password != model.ConfirmPassword)
-            {
-                return new UserManagerResponse
-                {
-                    Message = "Confirm password dosen't match",
-                    IsSuccess = false,
-                };
-            }
+            var user = await GetUserByEmailAsync(model.Email);
 
-            var identityUser = new IdentityUser
+            if (user == null)
             {
-                Email = model.Email,
-                UserName = model.Email,
-            };
-
-            var result = await _userManager.CreateAsync(identityUser, model.Password);
-
-            if (result.Succeeded)
-            {
-                return new UserManagerResponse
+                if (model.Password != model.ConfirmPassword)
                 {
-                    Message = "User Created Successfully",
-                    IsSuccess = true,
-                };
-            }
-            else
-            {
-                return new UserManagerResponse
+                    return new UserManagerResponse
+                    {
+                        Message = "Confirm password dosen't match",
+                        IsSuccess = false,
+                    };
+                }
+
+                var identityUser = new IdentityUser
                 {
-                    Message = "User didn't create",
-                    IsSuccess = false,
-                    Errors = result.Errors.Select(c => c.Description),
+                    Email = model.Email,
+                    UserName = model.Email,
                 };
+
+                var result = await _userManager.CreateAsync(identityUser, model.Password);
+
+                if (result.Succeeded)
+                {
+                    var validEmailtoken = await GenerateTokenAsync(identityUser);
+
+                    return new UserManagerResponse
+                    {
+                        Message = "User Created Successfully",
+                        IsSuccess = true,
+                        EmailVefificationtoken = validEmailtoken,
+                        UserId = identityUser.Id
+                    };
+                }
+                else
+                {
+                    return new UserManagerResponse
+                    {
+                        Message = "User didn't create",
+                        IsSuccess = false,
+                        Errors = result.Errors.Select(c => c.Description),
+                    };
+                }
             }
+            return null;
+
+        }
+
+        public async Task<string> GenerateTokenAsync(IdentityUser user)
+        {
+            var confirmEmailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var encodingEmailToken = Encoding.UTF8.GetBytes(confirmEmailToken);
+            var validEmailToken = WebEncoders.Base64UrlEncode(encodingEmailToken);
+
+            return validEmailToken;
         }
 
         public async Task<UserManagerResponse> LoginUserAsync(LoginViewModel model)
