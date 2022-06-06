@@ -10,6 +10,7 @@ namespace Authentication.Shared.ViewModel
         public bool IsSuccess { get; set; }
         public string EmailVefificationtoken { get; set; }
         public string UserId { get; set; }
+        public string Email { get; set; }
         public IEnumerable<string> Errors { get; set; }
         public DateTime? ExpireDate { get; set; }
     }

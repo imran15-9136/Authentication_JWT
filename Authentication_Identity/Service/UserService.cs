@@ -30,7 +30,7 @@ namespace Authentication_Identity.API.Service
 
         public async Task<IdentityUser> GetUserByEmailAsync(string email) => await _userManager.FindByEmailAsync(email);
 
-        public IdentityUser GetUssers() => (IdentityUser)_userManager.Users;
+        public IQueryable<IdentityUser> GetUsers() => _userManager.Users;
 
         public string GetCurrentUserIdAsync() => _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
         
@@ -144,12 +144,51 @@ namespace Authentication_Identity.API.Service
                 
             return new UserManagerResponse
             {
-                Message = tokenAsString, 
+                Message = "Login Successfully", 
                 IsSuccess = true,
-                ExpireDate = token.ValidTo
+                ExpireDate = token.ValidTo,
+                UserId = user.Id,
+                Email = user.Email,
+                EmailVefificationtoken = tokenAsString,
             };
         }
 
         public void LogoutAsync() => _signInManager.SignOutAsync();
+
+        public async Task<IdentityUser> ChangePasswordAsync(UserChangePassword model)
+        {
+            var userId = GetCurrentUserIdAsync();
+            if (userId ==null)
+            {
+                throw new Exception("User is not found while try to change password with User Id: " + userId);
+            }
+
+            var user = await GetUserByIdAsync(userId);
+
+            var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+
+            if (result.Succeeded)
+            {
+                throw new Exception("Unable to change password with user id: "+user.Id);
+            }
+            return user;
+        }
+
+        public async Task<IdentityUser> AdminResetPasswordAsynbc(AdminResetPasswordViewModel model)
+        {
+            var user = await GetUserByIdAsync(model.UserId);
+            if (user!=null)
+            {
+                user.PasswordHash = _userManager.PasswordHasher.HashPassword(user,model.NewPassword);
+
+                var result = await _userManager.UpdateAsync(user);
+
+                if (result.Succeeded)
+                {
+                    return user;
+                }
+            }
+            return null;
+        }
     }
 }

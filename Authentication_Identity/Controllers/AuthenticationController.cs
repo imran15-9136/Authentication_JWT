@@ -58,6 +58,37 @@ namespace Authentication_Identity.API.Controllers
             }
         }
 
+        [HttpPut("ChangePassword")]
+        public async Task<IActionResult> ChangePasswordAsync([FromBody] UserChangePassword model)
+        {
+            if(ModelState.IsValid && model.CurrentPassword == model.NewPassword)
+            {
+                return Ok(await _userService.ChangePasswordAsync(model));
+            }
+            return BadRequest(model);
+        }
+
+        [HttpPut("AdminPasswordChange")]
+        public async Task<IActionResult> AdminResetPassword([FromBody] AdminResetPasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                return Ok(await _userService.AdminResetPasswordAsynbc(model));
+            }
+            return BadRequest("Invalid Operation");
+        }
+
+        [HttpGet("GetUsers")]
+        public  IActionResult GetUsersAsync()
+        {
+            var user = _userService.GetUsers();
+            if (user!=null)
+            {
+                return Ok(user);
+            }
+            return NotFound();
+        }
+
         [HttpPost("Logout")]
         public void Logout() => _userService.LogoutAsync();
     }
