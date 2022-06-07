@@ -17,8 +17,8 @@ namespace Authentication_Identity.API.Service
 {
     public class UserService : IUserService
     {
-        private UserManager<IdentityUser> _userManager;
-        private IConfiguration _configuration;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly SignInManager<IdentityUser> _signInManager;
         public UserService(UserManager<IdentityUser> userManager, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, SignInManager<IdentityUser> signInManager)
@@ -198,6 +198,5 @@ namespace Authentication_Identity.API.Service
         }
 
         public void LogoutAsync() => _signInManager.SignOutAsync();
-
     }
 }
