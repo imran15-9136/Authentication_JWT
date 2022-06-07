@@ -7,6 +7,7 @@ namespace Authentication.Shared.ViewModel
 {
     public class RegisterViewModel
     {
+        public string Name { get; set; }
         [Required]
         [StringLength(50)]
         [EmailAddress]

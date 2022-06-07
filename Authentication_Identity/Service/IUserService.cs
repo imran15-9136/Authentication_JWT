@@ -16,8 +16,9 @@ namespace Authentication_Identity.API.Service
         string GetCurrentUserIdAsync();
         Task<IdentityUser> GetUserByIdAsync(string uid);
         Task<string> GenerateTokenAsync(IdentityUser user);
-        Task<IdentityUser> ChangePasswordAsync(UserChangePassword model);
-        Task<IdentityUser> AdminResetPasswordAsynbc(AdminResetPasswordViewModel model);
+        Task<IdentityResult> ConfirmEmailAsync(string uid, string token);
+        Task<IdentityUser> ChangePasswordAsync(UserChangePasswordDto model);
+        Task<IdentityUser> AdminresetPasswordAsync(AdminResetPasswordDto model);
         void LogoutAsync();
     }
 }

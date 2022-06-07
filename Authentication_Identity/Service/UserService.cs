@@ -1,4 +1,5 @@
 ﻿using Authentication.Shared.ViewModel;
+using Authentication_Identity.API.Model;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
@@ -18,14 +19,14 @@ namespace Authentication_Identity.API.Service
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IConfiguration _configuration;
-        private readonly SignInManager<IdentityUser> _signInManager;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public UserService(UserManager<IdentityUser> userManager, IConfiguration configuration, SignInManager<IdentityUser> signInManager, IHttpContextAccessor httpContextAccessor)
+        private readonly SignInManager<IdentityUser> _signInManager;
+        public UserService(UserManager<IdentityUser> userManager, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, SignInManager<IdentityUser> signInManager)
         {
             _userManager = userManager;
             _configuration = configuration;
-            _signInManager = signInManager;
             _httpContextAccessor = httpContextAccessor;
+            _signInManager = signInManager;
         }
 
         public async Task<IdentityUser> GetUserByEmailAsync(string email) => await _userManager.FindByEmailAsync(email);
@@ -37,6 +38,7 @@ namespace Authentication_Identity.API.Service
         public async Task<IdentityUser> GetUserByIdAsync(string uid) => await _userManager.FindByIdAsync(uid);
 
 
+
         public async Task<UserManagerResponse> RegisterUserAsync(RegisterViewModel model)
         {
             if (model == null)
@@ -44,10 +46,10 @@ namespace Authentication_Identity.API.Service
                 throw new NullReferenceException("Register Model is null");
             }
 
-            var user = await GetUserByEmailAsync(model.Email);
-
+            var user = GetUserByEmailAsync(model.Email);
             if (user == null)
             {
+
                 if (model.Password != model.ConfirmPassword)
                 {
                     return new UserManagerResponse
@@ -67,13 +69,13 @@ namespace Authentication_Identity.API.Service
 
                 if (result.Succeeded)
                 {
-                    var validEmailtoken = await GenerateTokenAsync(identityUser);
+                    var validEmailToken = await GenerateTokenAsync(identityUser);
 
                     return new UserManagerResponse
                     {
                         Message = "User Created Successfully",
                         IsSuccess = true,
-                        EmailVefificationtoken = validEmailtoken,
+                        EmailVerificatinToken = validEmailToken,
                         UserId = identityUser.Id
                     };
                 }
@@ -88,16 +90,15 @@ namespace Authentication_Identity.API.Service
                 }
             }
             return null;
-
         }
 
         public async Task<string> GenerateTokenAsync(IdentityUser user)
         {
             var confirmEmailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var encodingEmailToken = Encoding.UTF8.GetBytes(confirmEmailToken);
-            var validEmailToken = WebEncoders.Base64UrlEncode(encodingEmailToken);
+            var encodedEmailToken = Encoding.UTF8.GetBytes(confirmEmailToken);
+            var validEmailTken = WebEncoders.Base64UrlEncode(encodedEmailToken);
 
-            return validEmailToken;
+            return validEmailTken;
         }
 
         public async Task<UserManagerResponse> LoginUserAsync(LoginViewModel model)
@@ -141,7 +142,7 @@ namespace Authentication_Identity.API.Service
                 );
 
             string tokenAsString = new JwtSecurityTokenHandler().WriteToken(token);
-                
+            
             return new UserManagerResponse
             {
                 Message = "Login Successfully", 
@@ -153,14 +154,14 @@ namespace Authentication_Identity.API.Service
             };
         }
 
-        public void LogoutAsync() => _signInManager.SignOutAsync();
 
-        public async Task<IdentityUser> ChangePasswordAsync(UserChangePassword model)
+
+        public async Task<IdentityUser> ChangePasswordAsync(UserChangePasswordDto model)
         {
             var userId = GetCurrentUserIdAsync();
-            if (userId ==null)
+            if (userId == null)
             {
-                throw new Exception("User is not found while try to change password with User Id: " + userId);
+                throw new Exception("User is not found while try to change password with user Id: " + userId);
             }
 
             var user = await GetUserByIdAsync(userId);
@@ -174,10 +175,12 @@ namespace Authentication_Identity.API.Service
             return user;
         }
 
-        public async Task<IdentityUser> AdminResetPasswordAsynbc(AdminResetPasswordViewModel model)
+
+        public async Task<IdentityUser> AdminresetPasswordAsync(AdminResetPasswordDto model)
         {
             var user = await GetUserByIdAsync(model.UserId);
-            if (user!=null)
+
+            if (user!= null)
             {
                 user.PasswordHash = _userManager.PasswordHasher.HashPassword(user,model.NewPassword);
 
@@ -189,6 +192,25 @@ namespace Authentication_Identity.API.Service
                 }
             }
             return null;
+        }
+
+        public async Task<IdentityResult> ConfirmEmailAsync(string uid, string token)
+        {
+            var user = await GetUserByIdAsync(uid);
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+
+            if (result.Succeeded)
+            {
+                return result;
+            }
+
+            return null;
+        }
+
+        public void LogoutAsync()
+        {
+            _signInManager.SignOutAsync();
         }
     }
 }

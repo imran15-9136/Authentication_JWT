@@ -1,4 +1,5 @@
 ﻿using Authentication_Identity.API.Database;
+using Authentication_Identity.API.Model;
 using Authentication_Identity.API.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -62,7 +63,10 @@ namespace Authentication_Identity
                 };
             });
 
+            services.Configure<SMTPConfigModel>(Configuration.GetSection("SMTPConfig"));
+
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IEmailService, EmailService>();
 
             services.AddSwaggerGen();
 
