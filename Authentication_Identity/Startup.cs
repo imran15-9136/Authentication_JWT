@@ -1,4 +1,5 @@
-﻿using Authentication_Identity.API.Database;
+﻿using Authentication.API.Service;
+using Authentication_Identity.API.Database;
 using Authentication_Identity.API.Model;
 using Authentication_Identity.API.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -67,6 +68,7 @@ namespace Authentication_Identity
 
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IRoleService, RoleService>();
 
             services.AddSwaggerGen();
 
