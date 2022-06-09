@@ -29,5 +29,12 @@ namespace Authentication.API.Controllers
             }
             return BadRequest();
         }
+
+        [HttpGet("GetRoles")]
+        public async Task<IActionResult> GetRolesAsync()
+        {
+            var roles = await _roleService.GetRolesAsync();
+            return Ok(roles);
+        }
     }
 }
